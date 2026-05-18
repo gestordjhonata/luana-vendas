@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard - Luana Vendas</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:20px;background:#f6f7fb;color:#111}
+    h1{font-size:20px;margin:0 0 12px}
+    table{width:100%;border-collapse:collapse;background:#fff}
+    th,td{padding:8px;border-bottom:1px solid #eee;text-align:left;font-size:13px}
+    th{background:#fafafa}
+    pre{white-space:pre-wrap;font-family:monospace;font-size:12px}
+    .controls{margin:8px 0 16px;display:flex;gap:8px;align-items:center}
+  </style>
+</head>
+<body>
+  <h1>Dashboard — Eventos</h1>
+  <div class="controls">
+    <button id="refresh">Atualizar</button>
+    <label>Limite: <input id="limit" type="number" value="100" min="1" max="1000" style="width:80px"/></label>
+    <span id="status" style="margin-left:8px;color:#666"></span>
+  </div>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Tipo</th><th>Quando</th><th>Payload</th></tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <script>
+    async function load(){
+      const status = document.getElementById('status');
+      const limit = document.getElementById('limit').value || 100;
+      status.textContent = 'carregando...';
+      try{
+        const res = await fetch(`/api/events?limit=${limit}`);
+        const json = await res.json();
+        if(!json.ok){ status.textContent = 'erro: '+(json.error||''); return; }
+        const rows = document.getElementById('rows'); rows.innerHTML = '';
+        json.results.forEach(r=>{
+          const tr = document.createElement('tr');
+          const tdId = document.createElement('td'); tdId.textContent = r.id;
+          const tdType = document.createElement('td'); tdType.textContent = r.event_type || '';
+          const tdWhen = document.createElement('td'); tdWhen.textContent = r.created_at || '';
+          const tdPayload = document.createElement('td'); tdPayload.innerHTML = '<pre>'+escapeHtml(r.payload || '')+'</pre>';
+          tr.appendChild(tdId); tr.appendChild(tdType); tr.appendChild(tdWhen); tr.appendChild(tdPayload);
+          rows.appendChild(tr);
+        });
+        status.textContent = `mostrando ${json.results.length} eventos`;
+      }catch(e){ status.textContent = 'erro: '+e.message }
+    }
+    function escapeHtml(s){ try{ return JSON.stringify(JSON.parse(s), null, 2).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').slice(1,-1) }catch(e){ return (s||'') }}
+    document.getElementById('refresh').addEventListener('click', load);
+    document.getElementById('limit').addEventListener('change', load);
+    load();
+    setInterval(load, 15000);
+  </script>
+</body>
+</html>
