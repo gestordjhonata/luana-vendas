@@ -83,9 +83,9 @@
           <div class="text-xs text-[color:var(--muted)] mt-1">Receita / vendas</div>
         </div>
         <div class="card p-5">
-          <div class="kpi-label">Leads</div>
-          <div class="kpi-value mono accent-green mt-1" id="kpi-leads">—</div>
-          <div class="text-xs text-[color:var(--muted)] mt-1">Sem bots, período selecionado</div>
+          <div class="kpi-label">Sessões</div>
+          <div class="kpi-value mono accent-green mt-1" id="kpi-sessions">—</div>
+          <div class="text-xs text-[color:var(--muted)] mt-1">Visitantes rastreados na edge</div>
         </div>
       </div>
     </section>
@@ -195,34 +195,6 @@
       </div>
     </section>
 
-    <!-- Leads recentes -->
-    <section class="card p-5 fade-in">
-      <div class="flex items-center justify-between mb-3">
-        <div>
-          <div class="font-semibold">Leads Recentes</div>
-          <div class="text-xs text-[color:var(--muted)]">Clique em uma linha para ver o payload enviado ao Meta / GA4 e a resposta</div>
-        </div>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="text-xs uppercase tracking-wider text-[color:var(--dim)] border-b border-[color:var(--border)]">
-            <tr>
-              <th class="text-left py-2 pr-4">Quando</th>
-              <th class="text-left py-2 pr-4">E-mail</th>
-              <th class="text-left py-2 pr-4">Fonte</th>
-              <th class="text-left py-2 pr-4">Campanha</th>
-              <th class="text-left py-2 pr-4">Mídia</th>
-              <th class="text-center py-2 pr-4">Meta</th>
-              <th class="text-center py-2">GA4</th>
-            </tr>
-          </thead>
-          <tbody id="leads-tbody">
-            <tr><td colspan="7" class="py-6 text-center text-[color:var(--muted)]">Carregando…</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
     <!-- Compras recentes -->
     <section class="card p-5 fade-in">
       <div class="flex items-center justify-between mb-3">
@@ -251,23 +223,52 @@
       </div>
     </section>
 
-    <!-- Saúde do rastreamento -->
+    <!-- Funil de vendas + saúde -->
     <section class="card p-5 fade-in">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <div class="font-semibold">Saúde do Rastreamento</div>
-          <div class="text-xs text-[color:var(--muted)]">Captura first-party vs pixel. Mostra quantos eventos seriam perdidos sem o rastreamento server-side.</div>
+          <div class="font-semibold">Funil e Saúde do Rastreamento</div>
+          <div class="text-xs text-[color:var(--muted)]">Cobertura de atribuição do topo ao fundo do funil.</div>
         </div>
       </div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mono">
-        <div><div class="kpi-label">Eventos reais</div><div class="text-2xl" id="health-real">—</div></div>
-        <div><div class="kpi-label">Recuperados ITP</div><div class="text-2xl accent-green" id="health-itp">—</div></div>
-        <div><div class="kpi-label">Recuperados Adblock</div><div class="text-2xl accent-green" id="health-adblock">—</div></div>
-        <div><div class="kpi-label">Bots filtrados</div><div class="text-2xl accent-red" id="health-bots">—</div></div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mono mb-6">
+        <div class="border border-[color:var(--border)] rounded-lg p-4">
+          <div class="kpi-label">Sessões rastreadas</div>
+          <div class="text-2xl mt-1" id="funnel-sessions">—</div>
+          <div class="text-xs text-[color:var(--muted)] mt-1">Middleware capturou fbp</div>
+        </div>
+        <div class="border border-[color:var(--border)] rounded-lg p-4">
+          <div class="kpi-label">Iniciaram checkout</div>
+          <div class="text-2xl accent-amber mt-1" id="funnel-checkouts">—</div>
+          <div class="text-xs text-[color:var(--muted)] mt-1">checkout_sessions criadas</div>
+        </div>
+        <div class="border border-[color:var(--border)] rounded-lg p-4">
+          <div class="kpi-label">TRK nas compras</div>
+          <div class="text-2xl accent-green mt-1" id="funnel-trk">—</div>
+          <div class="text-xs text-[color:var(--muted)] mt-1">Atribuição completa</div>
+        </div>
+        <div class="border border-[color:var(--border)] rounded-lg p-4">
+          <div class="kpi-label">Cobertura fbp</div>
+          <div class="text-2xl accent-green mt-1" id="funnel-fbp">—</div>
+          <div class="text-xs text-[color:var(--muted)] mt-1">Sessões com fbp gerado</div>
+        </div>
       </div>
-      <div class="mt-5">
-        <div class="text-xs uppercase tracking-wider text-[color:var(--dim)] mb-2">Origem do fbp</div>
-        <div class="flex flex-wrap gap-2 text-xs" id="health-fbp"></div>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mono">
+        <div class="border border-[color:var(--border)] rounded-lg p-4">
+          <div class="kpi-label">Compras com fbc (fbclid)</div>
+          <div class="text-2xl mt-1" id="funnel-fbc">—</div>
+          <div class="text-xs text-[color:var(--muted)] mt-1">Cliques via link Meta</div>
+        </div>
+        <div class="border border-[color:var(--border)] rounded-lg p-4">
+          <div class="kpi-label">Meta CAPI confirmado</div>
+          <div class="text-2xl accent-green mt-1" id="funnel-meta-ok">—</div>
+          <div class="text-xs text-[color:var(--muted)] mt-1">Compras aceitas pelo Meta</div>
+        </div>
+        <div class="border border-[color:var(--border)] rounded-lg p-4">
+          <div class="kpi-label">GA4 confirmado</div>
+          <div class="text-2xl accent-green mt-1" id="funnel-ga4-ok">—</div>
+          <div class="text-xs text-[color:var(--muted)] mt-1">Compras aceitas pelo GA4</div>
+        </div>
       </div>
     </section>
 
@@ -359,6 +360,18 @@
     renderRevenueChart(data.time_series || []);
   }
 
+  async function loadFunnel(days) {
+    const data = await fetchJson(`/api/funnel?days=${days}`);
+    qs('#kpi-sessions').textContent = fmtInt(data.sessions);
+    qs('#funnel-sessions').textContent = fmtInt(data.sessions);
+    qs('#funnel-checkouts').textContent = fmtInt(data.checkout_sessions);
+    qs('#funnel-trk').textContent = data.trk_rate != null ? data.trk_rate + '%' : '—';
+    qs('#funnel-fbp').textContent = data.fbp_coverage != null ? data.fbp_coverage + '%' : '—';
+    qs('#funnel-fbc').textContent = data.fbc_coverage != null ? data.fbc_coverage + '%' : '—';
+    qs('#funnel-meta-ok').textContent = fmtInt(data.meta_ok);
+    qs('#funnel-ga4-ok').textContent = fmtInt(data.ga4_ok);
+  }
+
   async function loadProducts(days) {
     const data = await fetchJson(`/api/products?days=${days}`);
     const container = qs('#product-cards');
@@ -435,30 +448,6 @@
     `).join('');
     qsa('#utm-filters button[data-filter-key]').forEach(btn => {
       btn.addEventListener('click', () => { delete utmFilters[btn.getAttribute('data-filter-key')]; loadUtm(); });
-    });
-  }
-
-  async function loadLeads(days) {
-    const data = await fetchJson(`/api/leads?days=${days}&limit=50`);
-    qs('#kpi-leads').textContent = fmtInt((data.leads || []).length);
-    const tbody = qs('#leads-tbody');
-    if (!data.leads || data.leads.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-[color:var(--muted)]">Nenhum lead neste período.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = data.leads.map((l, i) => `
-      <tr class="row-hover border-b border-[color:var(--border)] cursor-pointer" data-idx="${i}">
-        <td class="py-2 pr-4 text-[color:var(--dim)]">${fmtDate(l.timestamp)}</td>
-        <td class="py-2 pr-4 mono">${escapeHtml(l.raw_email || '—')}</td>
-        <td class="py-2 pr-4">${escapeHtml(l.utm_source || '(direto)')}</td>
-        <td class="py-2 pr-4 text-[color:var(--dim)]">${escapeHtml(l.utm_campaign || '—')}</td>
-        <td class="py-2 pr-4 text-[color:var(--dim)]">${escapeHtml(l.utm_medium || '—')}</td>
-        <td class="py-2 pr-4 text-center">${l.meta_response_ok ? '<span class="accent-green font-bold">✓</span>' : '<span class="accent-red">✕</span>'}</td>
-        <td class="py-2 text-center">${l.ga4_response_ok ? '<span class="accent-green font-bold">✓</span>' : '<span class="accent-red">✕</span>'}</td>
-      </tr>
-    `).join('');
-    qsa('#leads-tbody tr[data-idx]').forEach(row => {
-      row.addEventListener('click', () => openDetails('lead', data.leads[parseInt(row.getAttribute('data-idx'), 10)]));
     });
   }
 
@@ -551,24 +540,6 @@
     modal.classList.remove('flex');
   }
 
-  async function loadHealth() {
-    const data = await fetchJson(`/api/events?limit=1`);
-    const rec = data.recovery || {};
-    qs('#health-real').textContent    = fmtInt(rec.real_events);
-    qs('#health-itp').textContent     = fmtInt(rec.itp_recovered);
-    qs('#health-adblock').textContent = fmtInt(rec.adblock_recovered);
-    qs('#health-bots').textContent    = fmtInt((rec.total_events || 0) - (rec.real_events || 0));
-    qs('#health-fbp').innerHTML = [
-      ['pixel_js',        rec.fbp_from_pixel,      'green'],
-      ['middleware_http', rec.fbp_from_middleware, 'green'],
-      ['tracker_http',    rec.fbp_from_session,    'amber'],
-      ['none',            rec.fbp_none,            'red'],
-    ].map(([label, val, color]) => `
-      <span class="border border-[color:var(--border)] rounded-lg px-2 py-1">
-        <span class="accent-${color} mono font-semibold">${fmtInt(val)}</span>
-        <span class="text-[color:var(--muted)] ml-1">${label}</span>
-      </span>`).join('');
-  }
 
   function renderRevenueChart(series) {
     const ctx = qs('#chart-revenue').getContext('2d');
@@ -631,7 +602,7 @@
 
   async function loadAll(days) {
     currentDays = days;
-    await Promise.all([loadRevenue(days), loadProducts(days), loadAttribution(days), loadUtm(), loadLeads(days), loadPurchases(), loadHealth()]);
+    await Promise.all([loadRevenue(days), loadProducts(days), loadAttribution(days), loadUtm(), loadPurchases(), loadFunnel(days)]);
   }
 
   qsa('#range-picker .range-btn').forEach(btn => {
