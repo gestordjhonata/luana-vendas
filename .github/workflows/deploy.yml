@@ -16,3 +16,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: dea0f07c30c1a6a210a7ed18c5d819e0
           command: pages deploy . --project-name luana-vendas --commit-dirty=true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
