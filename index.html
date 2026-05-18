@@ -277,20 +277,98 @@ Você está sofrendo porque ainda não conseguiu sair dele.</h3>				</div>
 				</div>
 
 		<script>
-		(async function(){
-			try{
-				const payload = { event_type: 'page_view', url: location.href, title: document.title, referrer: document.referrer, timestamp: new Date().toISOString(), ga_id: 'G-5F8M4DCPTS' };
-				if (navigator.sendBeacon) navigator.sendBeacon('/api/track', JSON.stringify(payload));
-				else fetch('/api/track', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-			}catch(e){}
+		(function(){
+			// ── Tracking stack v2 ────────────────────────────────────────────────
+			// Captura UTMs, gera trk, persiste checkout-session, reescreve links
+			// Hotmart com xcod=<trk> e sck=<bundle UTM>.
 
-			document.querySelectorAll('a[href*="hotmart"], a[href*="pay.hotmart"]').forEach(a=>{
-				a.addEventListener('click', function(){
-					const p = { event_type: 'click_purchase', url: this.href, text: this.innerText, timestamp: new Date().toISOString() };
-					if (navigator.sendBeacon) navigator.sendBeacon('/api/track', JSON.stringify(p));
-					else fetch('/api/track', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});
+			// 1. Captura UTMs da URL atual
+			const _qs = new URLSearchParams(location.search);
+			const utms = {
+				utm_source:   _qs.get('utm_source')   || '',
+				utm_medium:   _qs.get('utm_medium')   || '',
+				utm_campaign: _qs.get('utm_campaign') || '',
+				utm_content:  _qs.get('utm_content')  || '',
+				utm_term:     _qs.get('utm_term')     || '',
+			};
+			// Persiste UTMs na sessão para sobreviver a navegação interna
+			if (utms.utm_source) {
+				try { sessionStorage.setItem('_krob_utms', JSON.stringify(utms)); } catch(_) {}
+			}
+			const storedUtms = (() => { try { return JSON.parse(sessionStorage.getItem('_krob_utms') || '{}'); } catch(_) { return {}; } })();
+			const activeUtms = utms.utm_source ? utms : storedUtms;
+
+			// 2. Gera trk (UUID por visita — reutiliza dentro da mesma sessão de navegador)
+			let trk = sessionStorage.getItem('_krob_trk') || '';
+			if (!trk) {
+				trk = crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+					const r = Math.random() * 16 | 0;
+					return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
 				});
-			});
+				try { sessionStorage.setItem('_krob_trk', trk); } catch(_) {}
+			}
+
+			// 3. Persiste checkout-session no D1 (edge) com atribuição completa
+			fetch('/checkout-session', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					trk,
+					event_source_url: location.href,
+					utm_source:   activeUtms.utm_source   || '',
+					utm_medium:   activeUtms.utm_medium   || '',
+					utm_campaign: activeUtms.utm_campaign || '',
+					utm_content:  activeUtms.utm_content  || '',
+					utm_term:     activeUtms.utm_term     || '',
+				}),
+			}).catch(function(){});
+
+			// 4. Dispara PageView server-side (Meta CAPI via /tracker)
+			//    O evento_id é gerado aqui para deduplicar com o pixel browser-side
+			const pvEventId = crypto.randomUUID ? crypto.randomUUID() : trk + '_pv';
+			fetch('/tracker', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					event_name: 'PageView',
+					event_id:   pvEventId,
+					event_time: Math.floor(Date.now() / 1000),
+					event_source_url: location.href,
+				}),
+			}).catch(function(){});
+
+			// 5. Também passa o event_id para o Pixel browser-side (dedup Meta)
+			if (typeof fbq !== 'undefined') {
+				fbq('track', 'PageView', {}, { eventID: pvEventId });
+			}
+
+			// 6. Constrói bundle UTM para o parâmetro sck do Hotmart
+			//    Hotmart não propaga utm_* nativamente — empacotamos em sck
+			//    para recuperar na chegada do webhook (veja functions/webhook/hotmart/[slug].js)
+			function buildSckBundle(u) {
+				return [u.utm_source, u.utm_medium, u.utm_campaign, u.utm_content, u.utm_term]
+					.map(function(v) { try { return encodeURIComponent(v || ''); } catch(_) { return ''; } })
+					.join('|');
+			}
+
+			// 7. Reescreve todos os links Hotmart com xcod=<trk> e sck=<bundle>
+			function rewriteHotmartLinks() {
+				document.querySelectorAll('a[href*="hotmart"], a[href*="pay.hotmart"]').forEach(function(a) {
+					try {
+						const u = new URL(a.href);
+						u.searchParams.set('xcod', trk);
+						const sck = buildSckBundle(activeUtms);
+						if (sck.replace(/\|/g, '')) u.searchParams.set('sck', sck);
+						a.href = u.toString();
+					} catch(_) {}
+				});
+			}
+
+			rewriteHotmartLinks();
+			// Reaplica após renderização de componentes Elementor que possam inserir links tarde
+			if (document.readyState !== 'complete') {
+				window.addEventListener('load', rewriteHotmartLinks);
+			}
 		})();
 		</script>
 		<div class="elementor-element elementor-element-655e6bf e-con-full e-flex e-con e-child" data-id="655e6bf" data-element_type="container" data-e-type="container" data-settings="{&quot;_ha_eqh_enable&quot;:false}">
