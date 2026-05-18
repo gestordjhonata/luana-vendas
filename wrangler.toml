@@ -1,6 +1,8 @@
 name = "luana-vendas"
 compatibility_date = "2026-05-18"
 
+pages_build_output_dir = "."
+
 d1_databases = [
   { binding = "DB", database_name = "luana_events", database_id = "b65dfe80-e541-4fa7-9e8b-517060c52aab", preview_database_name = "luana_events" }
 ]
