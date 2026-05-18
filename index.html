@@ -121,6 +121,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-P9ZHKWGD');</script>
 <!-- End Google Tag Manager -->
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-5F8M4DCPTS"></script>
+		<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);} 
+		  gtag('js', new Date());
+		  gtag('config', 'G-5F8M4DCPTS');
+		</script>
 			<style>
 				.e-con.e-parent:nth-of-type(n+4):not(.e-lazyloaded):not(.e-no-lazyload),
 				.e-con.e-parent:nth-of-type(n+4):not(.e-lazyloaded):not(.e-no-lazyload) * {
@@ -267,6 +275,24 @@ Você está sofrendo porque ainda não conseguiu sair dele.</h3>				</div>
 						</div>
 				</div>
 				</div>
+
+		<script>
+		(async function(){
+			try{
+				const payload = { event_type: 'page_view', url: location.href, title: document.title, referrer: document.referrer, timestamp: new Date().toISOString(), ga_id: 'G-5F8M4DCPTS' };
+				if (navigator.sendBeacon) navigator.sendBeacon('/api/track', JSON.stringify(payload));
+				else fetch('/api/track', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+			}catch(e){}
+
+			document.querySelectorAll('a[href*="hotmart"], a[href*="pay.hotmart"]').forEach(a=>{
+				a.addEventListener('click', function(){
+					const p = { event_type: 'click_purchase', url: this.href, text: this.innerText, timestamp: new Date().toISOString() };
+					if (navigator.sendBeacon) navigator.sendBeacon('/api/track', JSON.stringify(p));
+					else fetch('/api/track', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});
+				});
+			});
+		})();
+		</script>
 		<div class="elementor-element elementor-element-655e6bf e-con-full e-flex e-con e-child" data-id="655e6bf" data-element_type="container" data-e-type="container" data-settings="{&quot;_ha_eqh_enable&quot;:false}">
 				<div class="elementor-element elementor-element-31b810a elementor-invisible elementor-widget elementor-widget-heading" data-id="31b810a" data-element_type="widget" data-e-type="widget" data-settings="{&quot;_animation&quot;:&quot;slideInUp&quot;,&quot;_animation_delay&quot;:0}" data-widget_type="heading.default">
 				<div class="elementor-widget-container">
